@@ -20,4 +20,3 @@
 26/03/2022:
 -Added new 700 lines compute.py file. This can be seen as a framework for computing various datas
 -The total length now is 1100 lines
--You can tell your professor that the compute.py file is a framework that you developed for further developement but you didn't have time to put all of its functions into the final product.
