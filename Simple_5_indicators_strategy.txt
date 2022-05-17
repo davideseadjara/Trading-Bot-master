@@ -1,0 +1,58 @@
+//@version=5
+strategy(title = 'Simple 5 indicators strategy', initial_capital=100000, 
+     commission_type = strategy.commission.percent, commission_value=0.04, 
+     default_qty_type = strategy.cash, default_qty_value = 50000, 
+     overlay = true)
+
+// Input date range
+startDate = input.int(defval = 1, title = "Start Date",
+     minval = 1, maxval = 31)
+startMonth = input.int(defval = 1, title = "Start Month",
+     minval = 1, maxval = 12)
+startYear = input.int(defval = 2020, title = "Start Year",
+     minval = 1800, maxval = 2100)
+
+endDate = input.int(defval = 1, title = "End Date",
+     minval = 1, maxval = 31)
+endMonth = input.int(defval = 3, title = "End Month",
+     minval = 1, maxval = 12)
+endYear = input.int(defval = 2022, title = "End Year",
+     minval = 1800, maxval = 2100)
+
+// Input parameters
+// Reference: https://kodify.net/tradingview/date-time/backtest-between-dates/
+EMA1_length = input(10, "First EMA period")
+EMA2_length = input(20, "Second EMA period")
+MA_length = input(50, "MA period")
+RSI_length = input(14, "RSI period")
+fastMACD_length = input(12, "Fast MACD period")
+slowMACD_length = input(26, "Slow MACD period")
+signalMACD_length = input(9, "Signal MACD period")
+
+// Calculates indicators
+EMA1 = ta.ema(close, EMA1_length)
+EMA2 = ta.ema(close, EMA2_length)
+MA = ta.sma(close, MA_length)
+MACD = ta.ema(close, fastMACD_length) - ta.ema(close, slowMACD_length)
+aMACD = ta.ema(MACD, signalMACD_length)
+delta = MACD - aMACD
+RSI = ta.rsi(close, RSI_length)
+
+// Date in range check
+inDateRange = (time >= timestamp(syminfo.timezone, startYear,
+         startMonth, startDate, 0, 0)) and
+     (time < timestamp(syminfo.timezone, endYear, endMonth, endDate, 0, 0))
+
+// Plot indicators
+// Cannot plot MACD and RSI as TradingView doesn't support multiple panes
+plot(EMA1)
+plot(EMA2)
+plot(MA)
+
+// Order execution
+if (delta > 0) and EMA1>EMA2 and EMA2>MA and RSI<70 and inDateRange
+    // Open long position when EMA1>EMA2>MA and RSI<70 and MACD Histogram>0
+	strategy.entry("Long entry", strategy.long, comment="Long entry")
+if (delta < 0) and EMA1< EMA2 and EMA2<MA and RSI>30 and inDateRange
+    // Open short position when EMA1<EMA2<MA and RSI>30 and MACD Histogram<0
+	strategy.entry("Short entry", strategy.short, comment="Short entry")

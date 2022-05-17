@@ -1,0 +1,8 @@
+ccxt
+datetime
+numpy
+pandas
+csv
+requests
+tkinter
+multiprocessing
